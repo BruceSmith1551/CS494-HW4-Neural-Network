@@ -11,6 +11,17 @@ class SingleLayerNN(nn.Module):
     def forward(self, x):
         return torch.sigmoid(self.linear(x))
 
+class XORNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.hidden = nn.Linear(2, 2)  # 2 → 2
+        self.output = nn.Linear(2, 1)  # 2 → 1
+
+    def forward(self, x):
+        x = torch.sigmoid(self.hidden(x))
+        x = torch.sigmoid(self.output(x))
+        return x
+
 # Inputs
 # A 'tensor' is just a multidimensional matrix
 X = torch.tensor([
@@ -24,6 +35,7 @@ X = torch.tensor([
 # Essentially holds the answers to the input 'X'
 y_and = torch.tensor([[0.0], [0.0], [0.0], [1.0]])
 y_or  = torch.tensor([[0.0], [1.0], [1.0], [1.0]])
+y_xor = torch.tensor([[0.0], [1.0], [1.0], [0.0]])
 
 def train(model, X, y, epochs=10000, learning_rate=0.1):
     criterion = nn.BCELoss()  # Binary Cross Entropy
@@ -46,19 +58,16 @@ def train(model, X, y, epochs=10000, learning_rate=0.1):
         if epoch % 2000 == 0:
             print(f"Epoch {epoch}, Loss: {loss.item():.4f}")
             print(model(X))
-        # Always print results
-        elif epoch == epochs:
-            print(f"Epoch {epoch}, Loss: {loss.item():.4f}")
 
 
 def main():
-    model_and = SingleLayerNN()
-    train(model_and, X, y_and)
+    model = XORNet()
+    train(model, X, y_xor, epochs=10000, learning_rate=0.5)
 
-    print("\nAND Results:")
-    print(model_and(X))
-    print("\nAND Results (rounded):")
-    print(model_and(X).round())
+    print("\nXOR Results:")
+    print(model(X))
+    print("\nXOR Results (rounded):")
+    print(model(X).round())
 
 
 if __name__ == "__main__":
