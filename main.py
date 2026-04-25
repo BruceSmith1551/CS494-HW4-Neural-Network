@@ -1,6 +1,24 @@
 import torch
 import torch.nn as nn
 
+
+# Inputs
+# A 'tensor' is just a multidimensional matrix
+X = torch.tensor([
+    [0.0, 0.0],
+    [0.0, 1.0],
+    [1.0, 0.0],
+    [1.0, 1.0]
+])
+
+# Targets
+# Essentially holds the answers to the input 'X'
+y_and = torch.tensor([[0.0], [0.0], [0.0], [1.0]])
+y_or  = torch.tensor([[0.0], [1.0], [1.0], [1.0]])
+y_xor = torch.tensor([[0.0], [1.0], [1.0], [0.0]])
+
+
+# ------------ PART D ---------------------------------
 class SingleLayerNN(nn.Module):
     def __init__(self):
         # https://docs.python.org/2/library/functions.html#super
@@ -21,21 +39,6 @@ class XORNet(nn.Module):
         x = torch.sigmoid(self.hidden(x))
         x = torch.sigmoid(self.output(x))
         return x
-
-# Inputs
-# A 'tensor' is just a multidimensional matrix
-X = torch.tensor([
-    [0.0, 0.0],
-    [0.0, 1.0],
-    [1.0, 0.0],
-    [1.0, 1.0]
-])
-
-# Targets
-# Essentially holds the answers to the input 'X'
-y_and = torch.tensor([[0.0], [0.0], [0.0], [1.0]])
-y_or  = torch.tensor([[0.0], [1.0], [1.0], [1.0]])
-y_xor = torch.tensor([[0.0], [1.0], [1.0], [0.0]])
 
 def train(model, X, y, epochs=10000, learning_rate=0.1):
     criterion = nn.BCELoss()  # Binary Cross Entropy
@@ -59,8 +62,7 @@ def train(model, X, y, epochs=10000, learning_rate=0.1):
             print(f"Epoch {epoch}, Loss: {loss.item():.4f}")
             print(model(X))
 
-
-def main():
+def part_d():
     model = XORNet()
     train(model, X, y_xor, epochs=10000, learning_rate=0.5)
 
@@ -68,7 +70,37 @@ def main():
     print(model(X))
     print("\nXOR Results (rounded):")
     print(model(X).round())
+# ------------ END PART D -----------------------------
 
+# ------------ PART C ---------------------------------
+
+# NAND as a neuron
+# Forcing behavior
+def NAND(a, b):
+    return torch.sigmoid(-10*a - 10*b + 15)
+
+# Performs: XOR = NAND(NAND(x,NAND(x,y)), NAND(y,NAND(x,y)))
+# XOR made up of a bunch of NANDs
+def XOR_circuit(x):
+    x1 = x[:, 0:1]  # All rows, 1st column (at index 0) -> 0.0
+                    #                                      0.0
+                    #                                      1.0
+                    #                                      1.0
+
+    x2 = x[:, 1:2]  # All rows, 2nd column (at index 1)
+
+    neuron1 = NAND(x1, x2)      # Feed each row of 'X' into NAND
+    neuron2 = NAND(x1, neuron1)
+    neuron3 = NAND(x2, neuron1)
+
+    out = NAND(neuron2, neuron3)
+
+    return out
+# ------------ END PART C -----------------------------
+
+def main():
+#    part_d()
+    print(XOR_circuit(X))
 
 if __name__ == "__main__":
     main()
