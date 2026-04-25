@@ -79,28 +79,48 @@ def part_d():
 def NAND(a, b):
     return torch.sigmoid(-10*a - 10*b + 15)
 
+def AND(a, b):
+    return torch.sigmoid(10*a + 10*b - 15)
+
+def OR(a, b):
+    return torch.sigmoid(10*a + 10*b - 5)
+
+def NOT(a):
+    return torch.sigmoid(-10*a + 5)
+
+# Performs: XOR = AND(OR(x,y), NOT(AND(x,y))
+def XOR_mixed(x):
+    x1 = x[:, 0:1]
+    x2 = x[:, 1:2]
+
+    or_ = OR(x1, x2)
+    and_ = AND(x1, x2)
+    not_and = NOT(and_)
+
+    return AND(or_, not_and)
+
 # Performs: XOR = NAND(NAND(x,NAND(x,y)), NAND(y,NAND(x,y)))
 # XOR made up of a bunch of NANDs
-def XOR_circuit(x):
-    x1 = x[:, 0:1]  # All rows, 1st column (at index 0) -> 0.0
-                    #                                      0.0
-                    #                                      1.0
-                    #                                      1.0
-
-    x2 = x[:, 1:2]  # All rows, 2nd column (at index 1)
-
-    neuron1 = NAND(x1, x2)      # Feed each row of 'X' into NAND
-    neuron2 = NAND(x1, neuron1)
-    neuron3 = NAND(x2, neuron1)
-
-    out = NAND(neuron2, neuron3)
-
-    return out
+# def XOR_circuit(x):
+#     x1 = x[:, 0:1]  # All rows, 1st column (at index 0) -> 0.0
+#                     #                                      0.0
+#                     #                                      1.0
+#                     #                                      1.0
+#
+#     x2 = x[:, 1:2]  # All rows, 2nd column (at index 1)
+#
+#     neuron1 = NAND(x1, x2)      # Feed each row of 'X' into NAND
+#     neuron2 = NAND(x1, neuron1)
+#     neuron3 = NAND(x2, neuron1)
+#
+#     out = NAND(neuron2, neuron3)
+#
+#     return out
 # ------------ END PART C -----------------------------
 
 def main():
 #    part_d()
-    print(XOR_circuit(X))
+    print(XOR_mixed(X))
 
 if __name__ == "__main__":
     main()
